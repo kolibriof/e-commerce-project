@@ -15,6 +15,8 @@ import { useProductsContext } from "./products_context";
 const initialState = {
   filtered_products: [],
   all_products: [],
+  grid_view: false,
+  sort: "name-a",
 };
 
 const FilterContext = React.createContext();
@@ -22,12 +24,23 @@ const FilterContext = React.createContext();
 export const FilterProvider = ({ children }) => {
   const { products } = useProductsContext();
   const [state, dispatch] = useReducer(reducer, initialState);
+  const changeView = (view) => {
+    if (view === "grid") {
+      dispatch({ type: SET_GRIDVIEW });
+    } else {
+      dispatch({ type: SET_LISTVIEW });
+    }
+  };
+  const updateSort = (e) => {
+    const value = e.target.value;
+    dispatch({ type: UPDATE_SORT, payload: value });
+  };
   useEffect(
     () => dispatch({ type: LOAD_PRODUCTS, payload: products }),
     [products]
   );
   return (
-    <FilterContext.Provider value="filter context">
+    <FilterContext.Provider value={{ ...state, changeView, updateSort }}>
       {children}
     </FilterContext.Provider>
   );
