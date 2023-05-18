@@ -93,7 +93,7 @@ const filter_reducer = (state, action) => {
     }
     if (color !== "all") {
       temp_products = temp_products.filter((p) => {
-        return p.color === color;
+        return p.colors.includes(color);
       });
     }
     if (price) {
