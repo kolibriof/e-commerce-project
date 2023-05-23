@@ -10,6 +10,7 @@ import { useUserContext } from "../context/user_context";
 
 const Nav = () => {
   const { openSidebar } = useProductsContext();
+  const { myUser } = useUserContext();
   return (
     <NavContainer>
       <div className="nav-center">
@@ -24,11 +25,18 @@ const Nav = () => {
         <ul className="nav-links">
           {links.map(({ id, url, text }) => {
             return (
-              <Link key={id} to={url}>
-                {text}
-              </Link>
+              <li>
+                <Link key={id} to={url}>
+                  {text}
+                </Link>
+              </li>
             );
           })}
+          {myUser && (
+            <li>
+              <Link to="/checkout">checkout</Link>
+            </li>
+          )}
         </ul>
         <CartButtons />
       </div>
