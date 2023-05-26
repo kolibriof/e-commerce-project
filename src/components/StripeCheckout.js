@@ -45,16 +45,60 @@ const CheckoutForm = () => {
     },
   };
   const createPaymentIntent = async () => {
-    console.log("log");
+    try {
+      const { data } = await axios.post(
+        "/.netlify/functions/create-payment-intent",
+        JSON.stringify({ cart, shipping_fee, total_amount })
+      );
+      setClientSecret(data.clientSecret);
+    } catch (error) {
+      console.log(error.response);
+    }
   };
   useEffect(() => {
     createPaymentIntent();
   }, []);
-  const handleChange = async (e) => {};
-  const handleSubmit = async (e) => {};
+  const handleChange = async (e) => {
+    setDisabled(e.empty);
+    setError(e.error ? e.error.message : "");
+  };
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setProcessing(true);
+    const payload = await stripe.confirmCardPayment(clientSecret, {
+      payment_method: {
+        card: elements.getElement(CardElement),
+      },
+    });
+    if (payload.error) {
+      setError(`Payment failed ${payload.error.message}`);
+      setProcessing(false);
+    } else {
+      setError(null);
+      setProcessing(false);
+      setSucceeded(true);
+      setTimeout(() => {
+        clearCart();
+        navigate("/");
+      }, 5000);
+    }
+  };
 
   return (
     <div>
+      {succeeded ? (
+        <article>
+          <h4>Thank you!</h4>
+          <h4>Your payment was successful!</h4>
+          <h4>Redirecting to the home page...</h4>
+        </article>
+      ) : (
+        <article>
+          <h4>Hello, {myUser?.name}</h4>
+          <p>Your total is {formatPrice(shipping_fee + total_amount)}</p>
+          <p>The Card Number is: 4242 4242 4242 4242</p>
+        </article>
+      )}
       <form id="payment-form" onSubmit={handleSubmit}>
         <CardElement
           id="card-element"
